@@ -1,21 +1,24 @@
 from core.common.names import *
 from core.event_holder import EventHolder
+from core.pythagoras_proof import PythagorasProof
+import core.common.resources as cr
 
 class AppEntry:
     def __init__(self):
-        self.event_holder = EventHolder()
-        self.screen = pg.display.set_mode([800,600],pg.RESIZABLE)
+        cr.screen = pg.display.set_mode([800,600],pg.RESIZABLE)
+        cr.event_holder = EventHolder()
+        self.pp = PythagorasProof()
 
     def render(self):
-        self.screen.fill("black")
-
-
+        cr.screen.fill("black")
+        self.pp.render()
         pg.display.update()
 
     def check_events(self):
-        self.event_holder.get_events()
+        cr.event_holder.get_events()
+        self.pp.check_events()
 
     def run(self):
-        while not self.event_holder.should_quit:
+        while not cr.event_holder.should_quit:
             self.check_events()
             self.render()
