@@ -10,7 +10,7 @@ class AppEntry:
         self.pp = PythagorasProof()
 
     def render(self):
-        cr.screen.fill("black")
+        cr.screen.fill("white")
         self.pp.render()
         pg.display.update()
 
