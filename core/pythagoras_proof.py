@@ -99,7 +99,17 @@ class PythagorasProof:
             width=2,
         )
 
+    def render_square_polygon(self, p1: Vector2, p2: Vector2, direction=1):
+        poly = create_square_from_line(p1, p2, direction=direction)
+        pg.draw.polygon(cr.screen, "black", points=poly, width=2)
+
+    def render_polygons(self):
+        self.render_square_polygon(self.p1, self.p2, 1)
+        self.render_square_polygon(self.p2, self.p3)
+        self.render_square_polygon(self.p3, self.p1)
+
     def render(self):
+        self.render_polygons()
         self.render_rectangle()
         self.render_circles()
         while len(self.render_exec_stack) != 0:
@@ -133,11 +143,7 @@ class PythagorasProof:
 
             locked_point.xy = new_point
 
-            self.triangle_center.xy = find_triangle_center(
-                self.p1,
-                self.p2,
-                self.p3
-            )
+            self.triangle_center.xy = find_triangle_center(self.p1, self.p2, self.p3)
 
         if self.locked_center:
             self.triangle_center.xy = cr.event_holder.mouse_pos
@@ -161,10 +167,9 @@ class PythagorasProof:
                 pg.mouse.set_cursor(pg.SYSTEM_CURSOR_ARROW)
 
         if mr.colliderect(drag_point_rect(self.triangle_center, self.drag_point_size)):
-            set_drag_cursor(cc,mh)
+            set_drag_cursor(cc, mh)
             if mc:
                 self.locked_center = True
-
 
         if cr.event_holder.should_render_debug and new_point is not None:
             self.render_exec_stack.append(

@@ -124,3 +124,22 @@ def resize_line(point1, point2, percentage):
     )
 
     return new_point1, new_point2
+
+
+def create_square_from_line(start_point: Vector2, end_point: Vector2, direction=1):
+    # Calculate the direction vector of the line
+    some_factor = end_point - start_point
+    some_factor.normalize_ip()
+    side_length = start_point.distance_to(end_point) * direction
+    # Calculate the perpendicular vector for the square
+    perpendicular = Vector2(some_factor.y, -some_factor.x)
+
+    # Calculate the four vertices of the square
+    p2 = start_point
+    p3 = start_point - perpendicular * side_length
+
+    p1 = end_point
+    p4 = end_point - perpendicular * side_length
+
+    # Return the list of points representing the square
+    return [p1, p2, p3, p4]
