@@ -129,11 +129,43 @@ class PythagorasProof:
 
     def get_line_name(self, p1, p2):
         if p1 == self.p1 and p2 == self.p2:
-            return "C"
-        if p1 == self.p2 and p2 == self.p3:
-            return "A"
-        if p1 == self.p3 and p2 == self.p1:
             return "B"
+        if p1 == self.p2 and p2 == self.p3:
+            return "C"
+        if p1 == self.p3 and p2 == self.p1:
+            return "A"
+
+    def render_formula(self):
+        dest_a = round(self.p3.distance_to(self.p1) * self.distance_scale, 2)
+        dest_b = round(self.p1.distance_to(self.p2) * self.distance_scale, 2)
+        dest_c = round(self.p3.distance_to(self.p2) * self.distance_scale, 2)
+
+        dest2_a = round((self.p3.distance_to(self.p1) * self.distance_scale) ** 2, 2)
+        dest2_b = round((self.p1.distance_to(self.p2) * self.distance_scale) ** 2, 2)
+        dest2_c = round((self.p3.distance_to(self.p2) * self.distance_scale) ** 2, 2)
+
+        space = lambda x: " " * x
+
+        formula_text = (
+            f"A\u00B2 + B\u00B2 = C\u00B2"
+            + space(5)
+            + "=>"
+            + space(5)
+            + f"{dest_a}\u00B2 + {dest_b}\u00B2 = {dest_c}\u00B2"
+            + space(5)
+            + "=>"
+            + space(5)
+            + f"\u221A{dest2_a} + \u221A{dest2_b} = \u221A{dest2_c}"
+        )
+        surface_text = self.font.render(formula_text, True, "black")
+
+        cr.screen.blit(
+            surface_text,
+            [
+                cr.screen.get_width() / 2 - surface_text.get_width() / 2,
+                cr.screen.get_height() - surface_text.get_height() - 5,
+            ],
+        )
 
     def render_square_polygon(self, p1: Vector2, p2: Vector2, direction=1):
         poly = create_square_from_line(p1, p2, direction=direction)
@@ -208,6 +240,7 @@ class PythagorasProof:
         self.render_polygons()
         # self.render_rectangle()
         self.render_circles()
+        self.render_formula()
         while len(self.render_exec_stack) != 0:
             # coolest shit I've written ever
             exec(self.render_exec_stack[0])
