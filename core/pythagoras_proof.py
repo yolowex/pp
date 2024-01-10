@@ -1,7 +1,10 @@
+import os
+
 from core.common.names import *
 from core.event_holder import EventHolder
 import core.common.resources as cr
 from core.common.utils import *
+from core.button import Button
 
 
 def drag_point_rect(point: Vector2, size: float):
@@ -30,8 +33,19 @@ class PythagorasProof:
         self.locked_point_id: Optional[int] = None
         self.locked_center = False
         self.render_exec_stack: list[str] = []
-        self.font = pg.font.SysFont("monospace", 25)
+        self.font = pg.font.SysFont("sans", 18)
         self.distance_scale = 0.02841
+        self.reset_button_image = pg.image.load(
+            os.getcwd() + "/assets/ui_buttons/reset.png"
+        )
+        self.reset_button_image = pg.transform.scale(self.reset_button_image, [50, 50])
+        self.reset_button = Button(
+            self.reset_button_image,
+            "black",
+            "gray",
+            stick_top_left=True,
+            callback=self.reset,
+        )
         self.reset()
 
     def reset(self):
@@ -42,11 +56,11 @@ class PythagorasProof:
         self.locked_point_id: Optional[int] = None
         self.locked_center = False
         self.render_exec_stack: list[str] = []
-        self.font = pg.font.SysFont("monospace", 25)
-        self.distance_scale = 0.02841
+        self.font = self.font
+        self.distance_scale = 0.033332
 
     def init_points(self):
-        length = cr.screen.get_width() * 0.22
+        length = cr.screen.get_height() * 0.25
         self.p1 = cr.sc_center()
         self.p2 = get_rotated_point(self.p1, length, -45)
         self.p3 = get_rotated_point(self.p1, length, -135)
@@ -113,10 +127,19 @@ class PythagorasProof:
             width=2,
         )
 
+    def get_line_name(self, p1, p2):
+        if p1 == self.p1 and p2 == self.p2:
+            return "C"
+        if p1 == self.p2 and p2 == self.p3:
+            return "A"
+        if p1 == self.p3 and p2 == self.p1:
+            return "B"
+
     def render_square_polygon(self, p1: Vector2, p2: Vector2, direction=1):
         poly = create_square_from_line(p1, p2, direction=direction)
         poly_center = get_polygon_center(poly)
         line_center = get_line_center(p1, p2)
+        line_name = self.get_line_name(p1, p2)
 
         poly_text = self.font.render(
             f"{round((p1.distance_to(p2)*self.distance_scale)**2,2)}"[::-1].zfill(6)[
@@ -128,7 +151,9 @@ class PythagorasProof:
         )
 
         line_text = self.font.render(
-            f"{round((p1.distance_to(p2)*self.distance_scale),2)}"[::-1].zfill(4)[::-1],
+            f"{line_name}: {round((p1.distance_to(p2)*self.distance_scale),2)}"[
+                ::-1
+            ].zfill(4)[::-1],
             True,
             "black",
             "white",
@@ -147,7 +172,7 @@ class PythagorasProof:
         draw_border(
             cr.screen,
             poly_text,
-            "black",
+            "gray",
             1,
             Vector2(
                 poly_center.x - poly_text.get_width() / 2,
@@ -166,7 +191,7 @@ class PythagorasProof:
         draw_border(
             cr.screen,
             line_text,
-            "black",
+            "gray",
             1,
             Vector2(
                 line_center.x - line_text.get_width() / 2,
@@ -269,8 +294,17 @@ pg.draw.line(
             self.on_screen_resize()
 
         self.check_drag_circles()
+        self.process_reset_button()
 
     def on_screen_resize(self):
         # self.init_points()
         self.triangle_center = cr.sc_center()
         self.recenter_points()
+        self.reset_button.update_position()
+
+    def process_reset_button(self):
+        # a process even is both a check and a render method.
+        # they use render_exec_stack to render things in the appropriate time and
+        # are called in check_events
+        self.reset_button.check_events()
+        self.render_exec_stack.append("self.reset_button.render(cr.screen)")
