@@ -24,7 +24,7 @@ def set_drag_cursor(current_cursor, mouse_held):
 class PythagorasProof:
     def __init__(self):
         self.triangle_center = cr.sc_center()
-        self.drag_point_size = 10
+        self.drag_point_size = 7
         self.p1 = self.p2 = self.p3 = self.p_center = Vector2()
         self.init_points()
         self.locked_point_id: Optional[int] = None
