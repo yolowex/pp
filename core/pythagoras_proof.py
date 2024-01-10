@@ -155,7 +155,7 @@ class PythagorasProof:
             + space(5)
             + "=>"
             + space(5)
-            + f"\u221A{dest2_a} + \u221A{dest2_b} = \u221A{dest2_c}"
+            + f"{dest2_a} + {dest2_b} ={dest2_c}"
         )
         surface_text = self.font.render(formula_text, True, "black")
 
