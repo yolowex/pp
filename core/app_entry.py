@@ -3,9 +3,10 @@ from core.event_holder import EventHolder
 from core.pythagoras_proof import PythagorasProof
 import core.common.resources as cr
 
+
 class AppEntry:
     def __init__(self):
-        cr.screen = pg.display.set_mode([800,600],pg.RESIZABLE)
+        cr.screen = pg.display.set_mode([800, 600], pg.RESIZABLE)
         cr.event_holder = EventHolder()
         self.pp = PythagorasProof()
 
