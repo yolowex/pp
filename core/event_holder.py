@@ -131,3 +131,6 @@ class EventHolder:
 
             else:
                 self.mouse_double_clicked = True
+
+        if pg.K_F2 in self.pressed_keys:
+            self.should_render_debug = not self.should_render_debug

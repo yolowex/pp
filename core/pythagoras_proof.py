@@ -30,13 +30,17 @@ class PythagorasProof:
         self.render_exec_stack: list[str] = []
 
     def init_points(self):
-        length = cr.screen.get_width() * 0.28
+        length = cr.screen.get_width() * 0.22
         self.p1 = cr.sc_center()
         self.p2 = get_rotated_point(self.p1, length, -45)
         self.p3 = get_rotated_point(self.p1, length, -135)
         # self.p_center = find_triangle_center(self.p1,self.p2,self.p3)
 
         center_triangle(self.p1, self.p2, self.p3, cr.sc_center())
+
+    def recenter_points(self):
+        center_triangle(self.p1, self.p2, self.p3, cr.sc_center())
+
 
     def get_locked_point(self):
         if self.locked_point_id == 2:
@@ -47,10 +51,10 @@ class PythagorasProof:
 
     def get_locked_point_line(self):
         if self.locked_point_id == 2:
-            return resize_line(self.p2,self.p1,10)
+            return resize_line(self.p2,self.p1,100)
 
         if self.locked_point_id == 3:
-            return resize_line(self.p3, self.p1, 10)
+            return resize_line(self.p3, self.p1, 100)
 
     def set_locked_point(self,point: Vector2 = None):
 
@@ -93,7 +97,7 @@ class PythagorasProof:
     def render(self):
         self.render_rectangle()
         self.render_drag_circles()
-        if len(self.render_exec_stack) != 0:
+        while len(self.render_exec_stack) != 0:
             # coolest shit I've written ever
             exec(self.render_exec_stack[0])
             self.render_exec_stack.pop(0)
@@ -114,7 +118,8 @@ class PythagorasProof:
             locked_line = self.get_locked_point_line()
             locked_point = self.get_locked_point()
 
-            self.render_exec_stack.append(
+            if cr.event_holder.should_render_debug:
+                self.render_exec_stack.append(
 """
 pg.draw.line(
     cr.screen,
@@ -123,13 +128,27 @@ pg.draw.line(
     self.get_locked_point_line()[1],
 )
 """
-            )
+                )
 
             new_point = closest_point_on_line(
                 locked_line[0],
                 locked_line[1],
-                locked_point
+                cr.event_holder.mouse_pos
             )
+            if cr.event_holder.should_render_debug:
+                self.render_exec_stack.append(
+f"""
+pg.draw.line(
+    cr.screen,
+    "green",
+    {str(new_point)},
+    {str(cr.event_holder.mouse_pos)},
+)
+"""
+            )
+
+
+
 
             locked_point.xy = new_point
 
@@ -161,4 +180,5 @@ pg.draw.line(
         self.check_drag_circles()
 
     def on_screen_resize(self):
-        self.init_points()
+        # self.init_points()
+        self.recenter_points()
