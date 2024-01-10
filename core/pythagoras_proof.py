@@ -30,6 +30,20 @@ class PythagorasProof:
         self.locked_point_id: Optional[int] = None
         self.locked_center = False
         self.render_exec_stack: list[str] = []
+        self.font = pg.font.SysFont("monospace", 25)
+        self.distance_scale = 0.02841
+        self.reset()
+
+    def reset(self):
+        self.triangle_center = cr.sc_center()
+        self.drag_point_size = 7
+        self.p1 = self.p2 = self.p3 = self.p_center = Vector2()
+        self.init_points()
+        self.locked_point_id: Optional[int] = None
+        self.locked_center = False
+        self.render_exec_stack: list[str] = []
+        self.font = pg.font.SysFont("monospace", 25)
+        self.distance_scale = 0.02841
 
     def init_points(self):
         length = cr.screen.get_width() * 0.22
@@ -101,7 +115,64 @@ class PythagorasProof:
 
     def render_square_polygon(self, p1: Vector2, p2: Vector2, direction=1):
         poly = create_square_from_line(p1, p2, direction=direction)
+        poly_center = get_polygon_center(poly)
+        line_center = get_line_center(p1, p2)
+
+        poly_text = self.font.render(
+            f"{round((p1.distance_to(p2)*self.distance_scale)**2,2)}"[::-1].zfill(6)[
+                ::-1
+            ],
+            True,
+            "black",
+            "white",
+        )
+
+        line_text = self.font.render(
+            f"{round((p1.distance_to(p2)*self.distance_scale),2)}"[::-1].zfill(4)[::-1],
+            True,
+            "black",
+            "white",
+        )
+
         pg.draw.polygon(cr.screen, "black", points=poly, width=2)
+
+        cr.screen.blit(
+            poly_text,
+            (
+                poly_center.x - poly_text.get_width() / 2,
+                poly_center.y - poly_text.get_height() / 2,
+            ),
+        )
+
+        draw_border(
+            cr.screen,
+            poly_text,
+            "black",
+            1,
+            Vector2(
+                poly_center.x - poly_text.get_width() / 2,
+                poly_center.y - poly_text.get_height() / 2,
+            ),
+        )
+
+        cr.screen.blit(
+            line_text,
+            (
+                line_center.x - line_text.get_width() / 2,
+                line_center.y - line_text.get_height() / 2,
+            ),
+        )
+
+        draw_border(
+            cr.screen,
+            line_text,
+            "black",
+            1,
+            Vector2(
+                line_center.x - line_text.get_width() / 2,
+                line_center.y - line_text.get_height() / 2,
+            ),
+        )
 
     def render_polygons(self):
         self.render_square_polygon(self.p1, self.p2, 1)
@@ -110,7 +181,7 @@ class PythagorasProof:
 
     def render(self):
         self.render_polygons()
-        self.render_rectangle()
+        # self.render_rectangle()
         self.render_circles()
         while len(self.render_exec_stack) != 0:
             # coolest shit I've written ever

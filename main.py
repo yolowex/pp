@@ -3,6 +3,7 @@ from core.app_entry import AppEntry
 
 
 def main():
+    pg.init()
     entry = AppEntry()
     entry.run()
 

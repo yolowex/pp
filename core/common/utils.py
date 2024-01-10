@@ -143,3 +143,42 @@ def create_square_from_line(start_point: Vector2, end_point: Vector2, direction=
 
     # Return the list of points representing the square
     return [p1, p2, p3, p4]
+
+
+def get_polygon_center(points):
+    # Ensure the list of points is not empty
+    if not points:
+        raise ValueError("List of points cannot be empty")
+
+    # Calculate the average x and y coordinates to find the center
+    total_x = sum(point[0] for point in points)
+    total_y = sum(point[1] for point in points)
+
+    center_x = total_x / len(points)
+    center_y = total_y / len(points)
+
+    return Vector2(center_x, center_y)
+
+
+def get_line_center(point1, point2):
+    # Calculate the average x and y coordinates to find the center
+    center_x = (point1[0] + point2[0]) / 2
+    center_y = (point1[1] + point2[1]) / 2
+
+    return Vector2(center_x, center_y)
+
+
+def draw_border(screen, surface, border_color, border_width, position):
+    rect = surface.get_rect()
+
+    pg.draw.rect(
+        screen,
+        border_color,
+        FRect(
+            position.x - border_width,
+            position.y - border_width,
+            rect.w + border_width,
+            rect.h + border_width,
+        ),
+        width=border_width,
+    )
