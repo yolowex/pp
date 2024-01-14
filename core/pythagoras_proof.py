@@ -232,9 +232,64 @@ class PythagorasProof:
         )
 
     def render_polygons(self):
-        self.render_square_polygon(self.p1, self.p2, 1)
+        self.render_square_polygon(
+            self.p1,
+            self.p2,
+        )
         self.render_square_polygon(self.p2, self.p3)
         self.render_square_polygon(self.p3, self.p1)
+
+        try:
+            rects: list[FRect] = [
+                poly_to_rect(poly)
+                for poly in [
+                    create_square_from_line(self.p1, self.p2),
+                    create_square_from_line(self.p1, self.p3),
+                    create_square_from_line(self.p2, self.p3),
+                ]
+            ]
+
+            A = rects[0]
+            B = rects[1]
+            C = rects[2]
+
+            A2 = A.copy()
+            B2 = B.copy()
+
+
+            A.topright = cr.screen.get_rect().topright
+            B.topright = A.bottomright + Vector2(0,25)
+            C.topright = B.bottomright + Vector2(0,25)
+            C.topright = A.topright
+            A2.topright = C.topright
+            B2.bottomleft = C.bottomleft
+
+
+            wh = abs((A.w + B.w)-C.w)
+            X2 = FRect(0,0,wh,wh)
+            X2.bottomleft = A2.bottomleft
+
+            X2_half: FRect = X2.copy()
+            X2_half.height /= 2
+
+
+            X3 = FRect(0,0,C.width - B.width,C.height-A.height)
+            X3.bottomright = C.bottomright
+
+            rects.extend([A2,B2])
+
+            for i in [C,A2,B2]:
+                pg.draw.rect(cr.screen, "gray", i, width=2)
+
+
+            pg.draw.rect(cr.screen, "red", X3, width=2)
+            pg.draw.rect(cr.screen, "green", X2, width=2)
+            pg.draw.rect(cr.screen, "yellow", X2_half, width=2)
+
+
+
+        except Exception as e:
+            print("Error ", e)
 
     def render(self):
         self.render_polygons()
