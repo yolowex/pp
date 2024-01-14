@@ -167,6 +167,63 @@ class PythagorasProof:
             ],
         )
 
+    def render_dissected_pieces(self):
+        A = create_square_from_line(self.p1, self.p2)
+        B = create_square_from_line(self.p3, self.p1)
+        C = create_square_from_line(self.p2, self.p3)
+
+
+        bigger = A
+        smaller = B
+        angle_points = 0,1
+        if A[0].distance_to(A[1]) <= B[0].distance_to(B[1]):
+            smaller = A
+            bigger = B
+            angle_points = 2,3
+
+        X = center_polygon(smaller, get_polygon_center(C))
+
+        pg.draw.polygon(cr.screen, "green", X)
+
+        mid_points = [
+            C[0].lerp(C[1],0.5),
+            C[1].lerp(C[2],0.5),
+            C[2].lerp(C[3],0.5),
+            C[3].lerp(C[0],0.5),
+
+        ]
+        angle = get_line_angle(smaller[angle_points[0]], smaller[angle_points[1]])
+        lines = []
+        for c,mid_point in enumerate(mid_points):
+            new_line = get_line(mid_point,angle-(c*90),5000)
+            lines.append(new_line)
+
+
+        points = [
+            find_line_intersection(l1,l2) for l1,l2 in
+            [
+                (lines[0],lines[1]),
+                (lines[1],lines[2]),
+                (lines[2],lines[3]),
+                (lines[3],lines[0]),
+            ]
+        ]
+
+        extra = -1 if smaller == B else 0
+        lines[0][1] = points[0+extra]
+        lines[1][1] = points[1+extra]
+        lines[2][1] = points[2+extra]
+        lines[3][1] = points[3+extra]
+
+        for line in lines:
+            pg.draw.line(cr.screen,"black",line[0],line[1],width=5)
+
+        # print(len(points))
+        # for point in points:
+        #     pg.draw.circle(cr.screen,"blue",point,5)
+
+
+
     def render_square_polygon(self, p1: Vector2, p2: Vector2, direction=1):
         poly = create_square_from_line(p1, p2, direction=direction)
         poly_center = get_polygon_center(poly)
@@ -193,48 +250,51 @@ class PythagorasProof:
 
         pg.draw.polygon(cr.screen, "black", points=poly, width=2)
 
-        cr.screen.blit(
-            poly_text,
-            (
-                poly_center.x - poly_text.get_width() / 2,
-                poly_center.y - poly_text.get_height() / 2,
-            ),
-        )
+        if cr.event_holder.should_render_debug:
+            cr.screen.blit(
+                poly_text,
+                (
+                    poly_center.x - poly_text.get_width() / 2,
+                    poly_center.y - poly_text.get_height() / 2,
+                ),
+            )
 
-        draw_border(
-            cr.screen,
-            poly_text,
-            "gray",
-            1,
-            Vector2(
-                poly_center.x - poly_text.get_width() / 2,
-                poly_center.y - poly_text.get_height() / 2,
-            ),
-        )
+            draw_border(
+                cr.screen,
+                poly_text,
+                "gray",
+                1,
+                Vector2(
+                    poly_center.x - poly_text.get_width() / 2,
+                    poly_center.y - poly_text.get_height() / 2,
+                ),
+            )
 
-        cr.screen.blit(
-            line_text,
-            (
-                line_center.x - line_text.get_width() / 2,
-                line_center.y - line_text.get_height() / 2,
-            ),
-        )
+            cr.screen.blit(
+                line_text,
+                (
+                    line_center.x - line_text.get_width() / 2,
+                    line_center.y - line_text.get_height() / 2,
+                ),
+            )
 
-        draw_border(
-            cr.screen,
-            line_text,
-            "gray",
-            1,
-            Vector2(
-                line_center.x - line_text.get_width() / 2,
-                line_center.y - line_text.get_height() / 2,
-            ),
-        )
+            draw_border(
+                cr.screen,
+                line_text,
+                "gray",
+                1,
+                Vector2(
+                    line_center.x - line_text.get_width() / 2,
+                    line_center.y - line_text.get_height() / 2,
+                ),
+            )
 
     def render_polygons(self):
-        self.render_square_polygon(self.p1, self.p2, 1)
+        self.render_dissected_pieces()
+        self.render_square_polygon(self.p1, self.p2)
         self.render_square_polygon(self.p2, self.p3)
         self.render_square_polygon(self.p3, self.p1)
+
 
     def render(self):
         self.render_polygons()

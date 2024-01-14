@@ -182,3 +182,75 @@ def draw_border(screen, surface, border_color, border_width, position):
         ),
         width=border_width,
     )
+
+
+def center_polygon(polygon, center_point):
+    # Calculate the centroid of the polygon
+    centroid = Vector2(0, 0)
+    for point in polygon:
+        centroid += point
+    centroid /= len(polygon)
+
+    # Calculate the translation vector
+    translation_vector = center_point - centroid
+
+    # Translate each point of the polygon
+    centered_polygon = [point + translation_vector for point in polygon]
+
+    return centered_polygon
+
+def get_line_angle(point1, point2):
+    # Calculate the difference between the points
+    dx = point2[0] - point1[0]
+    dy = point2[1] - point1[1]
+
+    # Use the arctangent function to get the angle in radians
+    angle_radians = math.atan2(dy, dx)
+
+    # Convert radians to degrees
+    angle_degrees = math.degrees(angle_radians)
+
+    return angle_degrees
+
+def get_line(start_point, angle_degrees, size):
+    # Convert angle from degrees to radians
+    angle_radians = math.radians(angle_degrees)
+
+    # Calculate the change in x and y based on the angle and size
+    dx = size * math.cos(angle_radians)
+    dy = size * math.sin(angle_radians)
+
+    # Calculate the end point
+    end_point = (start_point[0] + dx, start_point[1] + dy)
+
+    return [start_point,end_point]
+
+
+def find_line_intersection(line1, line2):
+    x1, y1 = line1[0]
+    x2, y2 = line1[1]
+    x3, y3 = line2[0]
+    x4, y4 = line2[1]
+
+    denominator = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
+
+    if denominator == 0:
+        return None  # Lines are parallel or coincident
+
+    px = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / denominator
+    py = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / denominator
+
+    intersection_point = Vector2(px, py)
+    return intersection_point
+
+def find_all_intersection_points(lines):
+    intersection_points = []
+
+    # Iterate through all pairs of lines and find intersections
+    for i in range(len(lines) - 1):
+        for j in range(i + 1, len(lines)):
+            intersection = find_line_intersection(lines[i], lines[j])
+            if intersection is not None and intersection not in intersection_points:
+                intersection_points.append(intersection)
+
+    return intersection_points
